@@ -88,6 +88,7 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
+  p->nice = 20;
 
   release(&ptable.lock);
 
@@ -530,5 +531,101 @@ procdump(void)
         cprintf(" %p", pc[i]);
     }
     cprintf("\n");
+  }
+}
+
+int
+getpname(int pid)
+{
+  struct proc *p;
+
+  acquire(&ptable.lock);
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+	if(p->pid == pid){
+	  cprintf("%s\n", p->name);
+	  release(&ptable.lock);
+	  return 0;
+	}
+  }
+  release(&ptable.lock);
+  return -1;
+}
+
+int
+getnice(int pid)
+{
+  struct proc *p;
+  int nice = 0;
+  acquire(&ptable.lock);
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+	if(p->pid == pid){
+	  nice = p->nice;
+	  release(&ptable.lock);
+	  return nice;
+	}
+  }
+  release(&ptable.lock);
+  return -1;
+}
+
+int
+setnice(int pid, int nice)
+{
+  struct proc *p;
+  if(nice < 0 || nice > 39) return -1;
+  acquire(&ptable.lock);
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+	if(p->pid == pid){
+	  p->nice = nice;
+	  release(&ptable.lock);
+	  return 0;
+	}
+  }
+  release(&ptable.lock);
+  return -1;
+}
+
+void
+ps(int pid)
+{
+  struct proc *p;
+  acquire(&ptable.lock);
+  if(pid == 0){
+	cprintf("name\t pid\t state\t\t priority\t \n");
+	for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+ 	  if(p->state == 1)
+	    cprintf("%s\t %d\t EMBRYO\t\t %d\t\n",p->name, p->pid, p->nice);
+	  if(p->state == 2)
+	    cprintf("%s\t %d\t SLEEPING\t %d\t\n",p->name, p->pid, p->nice);
+	  if(p->state == 3)
+	    cprintf("%s\t %d\t RUNNABLE\t %d\t\n",p->name, p->pid, p->nice);
+	  if(p->state == 4)
+	    cprintf("%s\t %d\t RUNNIG\t\t %d\t\n", p->name, p->pid, p->nice);
+	  if(p->state == 5)
+	    cprintf("%s\t %d\t ZOMBIE\t\t %d\t\n", p->name, p->pid, p->nice); 
+	}
+	release(&ptable.lock);
+	return;
+  }
+  else{
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      if(p->pid == pid){
+	cprintf("name\t pid\t state\t\t priority\t \n");
+          if(p->state == 1)
+            cprintf("%s\t %d\t EMBRYO\t\t %d\t\n",p->name, p->pid, p->nice);  
+          if(p->state == 2)
+            cprintf("%s\t %d\t SLEEPING\t %d\t\n",p->name, p->pid, p->nice);
+          if(p->state == 3)
+            cprintf("%s\t %d\t RUNNABLE\t %d\t\n",p->name, p->pid, p->nice);
+          if(p->state == 4)
+            cprintf("%s\t %d\t RUNNIG\t\t %d\t\n", p->name, p->pid, p->nice);
+          if(p->state == 5)
+            cprintf("%s\t %d\t ZOMBIE\t\t %d\t\n", p->name, p->pid, p->nice);
+      	release(&ptable.lock);
+      	return;
+      }
+     }
+    release(&ptable.lock);
+    return; 
   }
 }
