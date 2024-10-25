@@ -630,6 +630,7 @@ ps(int pid)
   struct proc *p;
   acquire(&ptable.lock);
   if(pid == 0){
+<<<<<<< HEAD
 	cprintf("name\t pid\t state\t\t priority\t runtime/weight\t runtime\t vruntime\t tick %d\n", ticks * 1000);
 	for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
  	  if(p->state == 1)
@@ -649,6 +650,7 @@ ps(int pid)
   else{
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->pid == pid){
+<<<<<<< HEAD
 	cprintf("name\t pid\t state\t\t priority\t runtime/weight\t runtime\t vruntime\t tick %d\n", ticks * 1000);
           if(p->state == 1)
             cprintf("%s\t %d\t EMBRYO\t\t %d\t\t %d\t\t %d\t\t %d\n",p->name, p->pid, p->nice, p->runtime/nice_to_weight[p->nice], p->runtime, p->vruntime);
